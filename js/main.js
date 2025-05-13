@@ -158,7 +158,12 @@ window.addEventListener('DOMContentLoaded', () => {
         const dir = path.slice(0,path.lastIndexOf('/')+1);
         const file= path.slice(path.lastIndexOf('/')+1);
         return BABYLON.SceneLoader.ImportMeshAsync(null,dir,file,scene)
-            .then(r=>{ r.meshes[0].name=tag; r.animationGroups.forEach(g=>g.stop()); return r; })
+            .then(r=>{
+                r.meshes[0].name = tag;          // keep custom name
+                r.rootMesh       = r.meshes[0];  // <<< fix: expose rootMesh
+                r.animationGroups.forEach(g=>g.stop());
+                return r;
+            })
             .catch(e=>{ console.error('load error',file,e); return null; });
     }
 
