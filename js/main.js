@@ -1,72 +1,82 @@
 // Wait for the DOM to be fully loaded
 window.addEventListener('DOMContentLoaded', () => {
-    // ... (DOM elements, engine, scene, game state vars - REMAIN THE SAME initially) ...
+    // Get DOM elements
     const startScreenWrapper = document.getElementById('startScreenWrapper');
     const gameArea = document.getElementById('gameArea');
     const startGameButton = document.getElementById('startGameButton');
     const renderCanvas = document.getElementById('renderCanvas');
-    const foodChoicesBar = document.getElementById('foodChoicesBar'); // We might repurpose or hide this later
+    const foodChoicesBar = document.getElementById('foodChoicesBar');
     const nextAnimalButton = document.getElementById('nextAnimalButton'); 
     
+    // Babylon.js Essentials & Game State
     let engine, scene, currentAnimalData, currentFoodAssets = {}, allGameAnimals = [], currentAnimalIndex = 0, isAcceptingInput = true;
-    let displayedFoodModels = []; // Keep track of food models currently shown as choices
+    let displayedFoodModels = [];
 
-    // ... (ASSET_PATHS - REMAINS THE SAME as your last version) ...
-    const ASSET_PATHS = { /* ... your existing paths ... */ };
+    // Asset paths
+    const ASSET_PATHS = {
+        monkey: "assets/models/monkey/monkey.glb",
+        cat: "assets/models/cat/cat.glb",
+        mouse: "assets/models/mouse/mouse.glb",
+        dog: "assets/models/dog/dog.glb",
+        whale: "assets/models/whale/whale.glb",
+        banana: "assets/models/banana/banana.glb",
+        milk: "assets/models/milk/milk.glb",
+        fish: "assets/models/fish/fish.glb",
+        pizza: "assets/models/pizza/pizza.glb",
+        hay: "assets/models/hay/hay.glb",
+        croissant: "assets/models/croissant/croissant.glb",
+        truck: "assets/models/truck/truck.glb",
+        flower: "assets/models/flower/flower.glb",
+        bone: "assets/models/bone/bone.glb",
+        cheese: "assets/models/cheese/cheese.glb"
+    };
 
-    // --- GAME DATA DEFINITION ---
-    // Add 'displayPosition' for food items when they are choices
-    // Add 'targetEatPosition' for animals (where food should go)
+    // GAME DATA DEFINITION
     const GAME_DATA = {
         animals: [
-            // Example for Monkey (YOU NEED TO UPDATE ALL ANIMALS)
             { 
                 name: "Monkey", modelPath: ASSET_PATHS.monkey, correctFood: "Banana",
                 sound: null, asset: null, 
-                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", // VERIFY THESE
+                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death",
                 scale: { x: 1, y: 1, z: 1 }, rotationY: 0,
-                targetEatPosition: new BABYLON.Vector3(0, 1.2, 0.5) // Approx mouth position relative to animal root
+                targetEatPosition: new BABYLON.Vector3(0, 1.2, 0.5) 
             },
-            // ... (YOUR OTHER ANIMAL DEFINITIONS with scale, rotationY, and targetEatPosition) ...
             { 
                 name: "Dog", modelPath: ASSET_PATHS.dog, correctFood: "Bone",
                 sound: null, asset: null, 
-                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", // VERIFY THESE
+                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", 
                 scale: { x: 1, y: 1, z: 1 }, rotationY: Math.PI,
                 targetEatPosition: new BABYLON.Vector3(0, 0.8, 0.6) 
             },
              { 
                 name: "Cat", modelPath: ASSET_PATHS.cat, correctFood: "Milk",
                 sound: null, asset: null, 
-                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", // VERIFY THESE
+                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", 
                 scale: { x: 1, y: 1, z: 1 }, rotationY: 0,
                 targetEatPosition: new BABYLON.Vector3(0, 0.6, 0.4)
             },
             { 
                 name: "Whale", modelPath: ASSET_PATHS.whale, correctFood: "Fish",
                 sound: null, asset: null, 
-                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", // VERIFY THESE
+                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", 
                 scale: { x: 2, y: 2, z: 2 }, rotationY: 0,
                 targetEatPosition: new BABYLON.Vector3(0, 1.5, 1)
             },
             { 
                 name: "Mouse", modelPath: ASSET_PATHS.mouse, correctFood: "Cheese",
                 sound: null, asset: null, 
-                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", // VERIFY THESE
+                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", 
                 scale: { x: 0.5, y: 0.5, z: 0.5 }, rotationY: 0,
                 targetEatPosition: new BABYLON.Vector3(0, 0.2, 0.2)
             },
         ],
         foods: [ 
-            // Example for Banana (YOU NEED TO UPDATE ALL FOODS)
-            // displayPosition is relative to the scene origin, where the food choices will appear
             { name: "Banana", modelPath: ASSET_PATHS.banana, asset: null, scale: {x:0.5,y:0.5,z:0.5}, displayPosition: new BABYLON.Vector3(-2, 0.3, 2) },
             { name: "Milk", modelPath: ASSET_PATHS.milk, asset: null, scale: {x:0.5,y:0.5,z:0.5}, displayPosition: new BABYLON.Vector3(-1, 0.3, 2) }, 
             { name: "Fish", modelPath: ASSET_PATHS.fish, asset: null, scale: {x:0.5,y:0.5,z:0.5}, displayPosition: new BABYLON.Vector3(0, 0.3, 2) }, 
-            // ... (YOUR OTHER FOOD DEFINITIONS with scale and new displayPosition) ...
             { name: "Bone", modelPath: ASSET_PATHS.bone, asset: null, scale: {x:0.5,y:0.5,z:0.5}, displayPosition: new BABYLON.Vector3(1, 0.3, 2) }, 
             { name: "Cheese", modelPath: ASSET_PATHS.cheese, asset: null, scale: {x:0.5,y:0.5,z:0.5}, displayPosition: new BABYLON.Vector3(2, 0.3, 2) }, 
-            { name: "Pizza", modelPath: ASSET_PATHS.pizza, asset: null, scale: {x:0.3,y:0.3,z:0.3}, displayPosition: new BABYLON.Vector3(-2, 0.3, 2.5) }, // Example different row
+            { name: "Pizza", modelPath: ASSET_PATHS.pizza, asset: null, scale: {x:0.3,y:0.3,z:0.3}, displayPosition: new BABYLON.Vector3(-2, 0.3, 2.5) }, 
             { name: "Hay", modelPath: ASSET_PATHS.hay, asset: null, scale: {x:0.4,y:0.4,z:0.4}, displayPosition: new BABYLON.Vector3(-1, 0.3, 2.5) }, 
             { name: "Croissant", modelPath: ASSET_PATHS.croissant, asset: null, scale: {x:0.3,y:0.3,z:0.3}, displayPosition: new BABYLON.Vector3(0, 0.3, 2.5) }, 
             { name: "Truck", modelPath: ASSET_PATHS.truck, asset: null, scale: {x:0.4,y:0.4,z:0.4}, displayPosition: new BABYLON.Vector3(1, 0.3, 2.5) }, 
@@ -74,25 +84,281 @@ window.addEventListener('DOMContentLoaded', () => {
         ]
     };
 
-    // --- INITIALIZATION & SCENE ---
-    // ... (initializeGame, createScene - REMAINS THE SAME) ...
-    // ... (preloadFoodModels - REMAINS THE SAME, it already hides preloaded foods) ...
-    // ... (loadModel - REMAINS THE SAME) ...
+    // --- FUNCTION DEFINITIONS ---
+    // (All helper functions: createScene, preloadFoodModels, loadModel, playAnimation, 
+    //  setup3DFoodChoices, setupFallbackHtmlFoodChoices, handleFoodChoice, proceedToNextAnimal
+    //  MUST BE DEFINED HERE, BEFORE initializeGame if initializeGame calls them, OR ensure initializeGame is defined last if it uses them)
 
-    // --- GAME FLOW & UI ---
+    function createScene() {
+        const scene = new BABYLON.Scene(engine);
+        const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.8, 5, new BABYLON.Vector3(0, 1.2, 0), scene);
+        camera.lowerRadiusLimit = 2; camera.upperRadiusLimit = 15;
+        camera.lowerBetaLimit = Math.PI / 6; camera.upperBetaLimit = Math.PI / 1.9;
+        // camera.attachControl(renderCanvas, true); // For Dev
+
+        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0.5, 1, 0.25), scene);
+        light.intensity = 1.2;
+
+        const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 20, height: 20}, scene);
+        const groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
+        groundMaterial.diffuseColor = new BABYLON.Color3(0.6, 0.75, 0.6);
+        ground.material = groundMaterial;
+        ground.position.y = 0;
+
+        scene.clearColor = new BABYLON.Color4(0.85, 0.93, 1, 1);
+        return scene;
+    }
+
+    async function preloadFoodModels() {
+        console.log("Preloading food models...");
+        for (const foodData of GAME_DATA.foods) {
+            if (foodData.modelPath && !currentFoodAssets[foodData.name]) {
+                const loadedAsset = await loadModel(foodData.modelPath, `${foodData.name}_model_asset`, scene); // Unique name for asset container
+                if (loadedAsset && loadedAsset.rootMesh) {
+                    currentFoodAssets[foodData.name] = loadedAsset;
+                    loadedAsset.rootMesh.name = `${foodData.name}_model_root`; // Name the root mesh itself
+                    loadedAsset.rootMesh.isVisible = false; 
+                    if (foodData.scale) { 
+                        loadedAsset.rootMesh.scaling = new BABYLON.Vector3(foodData.scale.x, foodData.scale.y, foodData.scale.z);
+                    }
+                    console.log(`${foodData.name} preloaded.`);
+                }
+            }
+        }
+        console.log("Food preloading complete.");
+    }
+
+    async function loadModel(modelPath, modelNameInScene, targetScene) {
+        if (!modelPath) {
+            console.warn(`No model path provided for ${modelNameInScene}. Skipping load.`);
+            return null;
+        }
+        try {
+            const result = await BABYLON.SceneLoader.ImportMeshAsync(
+                null, 
+                modelPath.substring(0, modelPath.lastIndexOf('/') + 1), 
+                modelPath.substring(modelPath.lastIndexOf('/') + 1),    
+                targetScene
+            );
+            const rootMesh = result.meshes[0];
+            if (rootMesh) { // Check if rootMesh exists
+                rootMesh.name = modelNameInScene; // Assign the desired name to the root mesh
+            }
+            console.log(`${modelNameInScene} (from ${modelPath}) loaded. Meshes: ${result.meshes.length}, Animations: ${result.animationGroups.length}`);
+            result.animationGroups.forEach(ag => ag.stop());
+            return { rootMesh, animationGroups: result.animationGroups, meshes: result.meshes };
+        } catch (error) {
+            console.error(`Error loading model ${modelNameInScene} from ${modelPath}:`, error);
+            return null;
+        }
+    }
+    
+    function playAnimation(asset, animationName, loop = true) {
+        if (!asset || !asset.animationGroups || asset.animationGroups.length === 0) {
+            console.warn(`No animation groups for ${asset?.rootMesh?.name}`);
+            return null;
+        }
+        const animGroup = asset.animationGroups.find(ag => ag.name.toLowerCase().includes(animationName.toLowerCase()));
+        
+        asset.animationGroups.forEach(ag => { if (ag !== animGroup) ag.stop(); });
+        
+        if (animGroup) {
+            animGroup.play(loop); 
+            return animGroup;
+        } else {
+            console.warn(`Anim "${animationName}" not found for ${asset.rootMesh.name}. Avail:`, asset.animationGroups.map(ag => ag.name));
+            if (asset.animationGroups.length > 0 && animationName.toLowerCase().includes("idle")) {
+                asset.animationGroups[0].play(loop);
+                return asset.animationGroups[0];
+            }
+        }
+        return null;
+    }
+
+    async function setup3DFoodChoices() {
+        // Hide previously displayed 3D food models
+        displayedFoodModels.forEach(foodAssetContainer => { // Renamed to avoid confusion
+            if (foodAssetContainer && foodAssetContainer.rootMesh) foodAssetContainer.rootMesh.isVisible = false;
+        });
+        displayedFoodModels = [];
+
+        const correctFoodName = currentAnimalData.correctFood;
+        let foodOptionNames = [correctFoodName];
+        
+        let distractors = GAME_DATA.foods.filter(food => food.name !== correctFoodName).map(food => food.name);
+        distractors.sort(() => 0.5 - Math.random());
+        foodOptionNames.push(...distractors.slice(0, 4));
+        
+        let i = 0;
+        while (foodOptionNames.length < 5 && GAME_DATA.foods.length > foodOptionNames.length) {
+            let potentialDistractor = GAME_DATA.foods.find(f => !foodOptionNames.includes(f.name))?.name;
+            if (potentialDistractor) foodOptionNames.push(potentialDistractor); else break;
+        }
+        i = 0; 
+        let originalDistractors = distractors.length > 0 ? distractors : GAME_DATA.foods.map(f => f.name).filter(n => n !== correctFoodName);
+        while (foodOptionNames.length < 5 && foodOptionNames.length > 0 && originalDistractors.length > 0) {
+            foodOptionNames.push(originalDistractors[i % originalDistractors.length]);
+            i++;
+        }
+        foodOptionNames.sort(() => 0.5 - Math.random());
+
+        const choicePositions = [
+            new BABYLON.Vector3(-2, 0.3, 2.5), new BABYLON.Vector3(-1, 0.3, 2.5),
+            new BABYLON.Vector3(0, 0.3, 2.5),  new BABYLON.Vector3(1, 0.3, 2.5),
+            new BABYLON.Vector3(2, 0.3, 2.5)  
+        ];
+
+        let successfullyShown3DModels = 0;
+        for (let j = 0; j < foodOptionNames.length; j++) {
+            const foodName = foodOptionNames[j];
+            const foodData = GAME_DATA.foods.find(f => f.name === foodName);
+            const foodAssetContainer = currentFoodAssets[foodName]; // Get preloaded asset container
+
+            if (foodAssetContainer && foodAssetContainer.rootMesh && foodData) {
+                foodAssetContainer.rootMesh.isVisible = true;
+                foodAssetContainer.rootMesh.position = choicePositions[j] || foodData.displayPosition || new BABYLON.Vector3(j*1.5 - 3, 0.3, 2);
+                // foodAssetContainer.rootMesh.name = `foodChoice_${foodName}`; // Already named during preload
+
+                if (foodData.scale) { 
+                    foodAssetContainer.rootMesh.scaling = new BABYLON.Vector3(foodData.scale.x, foodData.scale.y, foodData.scale.z);
+                }
+                displayedFoodModels.push(foodAssetContainer);
+                successfullyShown3DModels++;
+            } else {
+                console.warn(`Asset for food choice ${foodName} not found or not loaded.`);
+            }
+        }
+
+        if (successfullyShown3DModels > 0) {
+            foodChoicesBar.style.display = 'none'; // Hide HTML bar if 3D models are shown
+            // TODO: Implement 3D picking here
+            // For now, re-enable HTML buttons if 3D picking isn't ready, for testing logic
+            if (foodChoicesBar.innerHTML === '' || foodChoicesBar.style.display === 'none') { // Check if it needs repopulating
+                 setupFallbackHtmlFoodChoices(foodOptionNames); // Re-populate and show HTML buttons
+            }
+        } else { // No 3D models shown, ensure HTML bar is visible and populated
+             setupFallbackHtmlFoodChoices(foodOptionNames);
+        }
+    }
+    
+    function setupFallbackHtmlFoodChoices(foodOptionNames) {
+        foodChoicesBar.innerHTML = ''; // Clear first
+        if (!foodOptionNames || foodOptionNames.length === 0) {
+            console.error("No food option names provided for fallback HTML buttons.");
+            return;
+        }
+        foodOptionNames.forEach(foodName => {
+            const foodButton = document.createElement('button');
+            foodButton.innerText = foodName;
+            foodButton.dataset.foodName = foodName;
+            foodButton.classList.add('food-choice-button');
+            foodButton.addEventListener('click', handleFoodChoice);
+            foodChoicesBar.appendChild(foodButton);
+        });
+        foodChoicesBar.style.display = 'flex';
+    }
+
+    async function handleFoodChoice(eventOrFoodName) {
+        if (!isAcceptingInput) return;
+        isAcceptingInput = false;
+
+        let chosenFoodName;
+        if (typeof eventOrFoodName === 'string') {
+            chosenFoodName = eventOrFoodName;
+        } else {
+            chosenFoodName = eventOrFoodName.target.dataset.foodName;
+        }
+        console.log(`Chose food: ${chosenFoodName}`);
+
+        displayedFoodModels.forEach(foodAssetContainer => {
+            if (foodAssetContainer && foodAssetContainer.rootMesh) foodAssetContainer.rootMesh.isVisible = false;
+        });
+        foodChoicesBar.style.display = 'none'; 
+
+        const chosenFoodAssetContainer = currentFoodAssets[chosenFoodName];
+        let foodToAnimateRootMesh = null;
+
+        if (chosenFoodAssetContainer && chosenFoodAssetContainer.rootMesh) {
+            foodToAnimateRootMesh = chosenFoodAssetContainer.rootMesh;
+            foodToAnimateRootMesh.isVisible = true; 
+            if (currentAnimalData.targetEatPosition && currentAnimalData.asset && currentAnimalData.asset.rootMesh) {
+                // Position food relative to animal's current position and its defined targetEatPosition
+                let absoluteEatPosition = currentAnimalData.asset.rootMesh.position.add(currentAnimalData.targetEatPosition);
+                foodToAnimateRootMesh.position = absoluteEatPosition;
+            }
+        }
+
+        if (chosenFoodName === currentAnimalData.correctFood) {
+            console.log("Correct!");
+            const eatAnim = playAnimation(currentAnimalData.asset, currentAnimalData.eatAnim || "eat", false);
+            if (eatAnim) {
+                eatAnim.onAnimationEndObservable.addOnce(() => {
+                    if (foodToAnimateRootMesh) foodToAnimateRootMesh.isVisible = false; 
+                    const happyAnim = playAnimation(currentAnimalData.asset, currentAnimalData.happyAnim || "happy", false);
+                    if (happyAnim) {
+                        happyAnim.onAnimationEndObservable.addOnce(() => { nextAnimalButton.style.display = 'block'; isAcceptingInput = true; });
+                    } else { nextAnimalButton.style.display = 'block'; isAcceptingInput = true; }
+                });
+            } else { 
+                if (foodToAnimateRootMesh) foodToAnimateRootMesh.isVisible = false;
+                const happyAnim = playAnimation(currentAnimalData.asset, currentAnimalData.happyAnim || "happy", false);
+                if (happyAnim) { happyAnim.onAnimationEndObservable.addOnce(() => { nextAnimalButton.style.display = 'block'; isAcceptingInput = true; }); }
+                else { nextAnimalButton.style.display = 'block'; isAcceptingInput = true; }
+            }
+        } else { 
+            console.log("Incorrect!");
+            if (foodToAnimateRootMesh) foodToAnimateRootMesh.isVisible = false; 
+            const shrugAnim = playAnimation(currentAnimalData.asset, currentAnimalData.shrugAnim || "shrug", false);
+            if (shrugAnim) {
+                shrugAnim.onAnimationEndObservable.addOnce(() => {
+                    setup3DFoodChoices(); 
+                    isAcceptingInput = true;
+                });
+            } else { 
+                setup3DFoodChoices(); 
+                isAcceptingInput = true;
+            }
+        }
+    }
+    
+    function proceedToNextAnimal() {
+        currentAnimalIndex++;
+        loadAndDisplayCurrentAnimal(); // This will handle hiding button and setting up next state
+    }
+
+    // THIS IS THE MAIN INITIALIZATION FUNCTION
+    async function initializeGame() { // Made async to await preloadFoodModels
+        startScreenWrapper.style.display = 'none';
+        gameArea.style.display = 'flex';
+        nextAnimalButton.style.display = 'none';
+        isAcceptingInput = true;
+
+        engine = new BABYLON.Engine(renderCanvas, true, { stencil: true, preserveDrawingBuffer: true }, true);
+        scene = createScene();
+
+        engine.runRenderLoop(() => { if (scene) scene.render(); });
+        window.addEventListener('resize', () => engine.resize());
+
+        allGameAnimals = GAME_DATA.animals; 
+        currentAnimalIndex = 0;
+        
+        await preloadFoodModels(); // Wait for foods to preload
+        loadAndDisplayCurrentAnimal(); 
+    }
+    
+    // THIS FUNCTION IS CALLED WHEN A NEW ANIMAL NEEDS TO BE LOADED
     async function loadAndDisplayCurrentAnimal() {
         isAcceptingInput = false; 
         nextAnimalButton.style.display = 'none'; 
-        foodChoicesBar.style.display = 'none'; // Hide HTML button bar permanently if using 3D food
-                                               // Or hide it temporarily if still using for fallback
-
-        // Hide previously displayed 3D food models
-        displayedFoodModels.forEach(foodAsset => {
-            if (foodAsset && foodAsset.rootMesh) foodAsset.rootMesh.isVisible = false;
+        
+        // Hide previously displayed 3D food models explicitly
+        displayedFoodModels.forEach(foodAssetContainer => {
+            if (foodAssetContainer && foodAssetContainer.rootMesh) foodAssetContainer.rootMesh.isVisible = false;
         });
-        displayedFoodModels = []; // Clear the array
+        displayedFoodModels = []; 
 
         if (currentAnimalIndex >= allGameAnimals.length) {
+            console.log("Game Over - All animals shown! Looping...");
             currentAnimalIndex = 0; 
         }
         currentAnimalData = allGameAnimals[currentAnimalIndex];
@@ -106,195 +372,33 @@ window.addEventListener('DOMContentLoaded', () => {
         if (currentAnimalData.asset && currentAnimalData.asset.rootMesh) {
             currentAnimalData.asset.rootMesh.position = new BABYLON.Vector3(0, 0, 0); 
             currentAnimalData.asset.rootMesh.rotation.y = currentAnimalData.rotationY || 0;
-            if (currentAnimalData.scale) { /* ... apply scale ... */ 
+            if (currentAnimalData.scale) { 
                  currentAnimalData.asset.rootMesh.scaling = new BABYLON.Vector3(currentAnimalData.scale.x, currentAnimalData.scale.y, currentAnimalData.scale.z);
             }
             playAnimation(currentAnimalData.asset, currentAnimalData.idleAnim || "idle", true);
             
-            await setup3DFoodChoices(); // CHANGED from setupFoodChoicesUI
+            await setup3DFoodChoices(); 
             
             isAcceptingInput = true; 
-        } else { /* ... error handling, proceedToNextAnimal ... */ 
+        } else { 
             console.error(`Failed to load/display ${currentAnimalData.name}. Skipping.`);
             isAcceptingInput = true; 
             proceedToNextAnimal(); 
         }
     }
 
-    // NEW FUNCTION for 3D food choices
-    async function setup3DFoodChoices() {
-        const correctFoodName = currentAnimalData.correctFood;
-        let foodOptionNames = [correctFoodName];
-        // ... (logic to get 4 distractor names - REMAINS THE SAME as in setupFoodChoicesUI) ...
-        let distractors = GAME_DATA.foods.filter(food => food.name !== correctFoodName).map(food => food.name);
-        distractors.sort(() => 0.5 - Math.random());
-        foodOptionNames.push(...distractors.slice(0, 4));
-        let i = 0;
-        while (foodOptionNames.length < 5 && GAME_DATA.foods.length > foodOptionNames.length) {
-            let potentialDistractor = GAME_DATA.foods.find(f => !foodOptionNames.includes(f.name))?.name;
-            if (potentialDistractor) foodOptionNames.push(potentialDistractor); else break;
-        }
-        i = 0; 
-        let originalDistractors = distractors.length > 0 ? distractors : GAME_DATA.foods.map(f => f.name).filter(n => n !== correctFoodName);
-        while (foodOptionNames.length < 5 && foodOptionNames.length > 0 && originalDistractors.length > 0) {
-            foodOptionNames.push(originalDistractors[i % originalDistractors.length]);
-            i++;
-        }
-        foodOptionNames.sort(() => 0.5 - Math.random());
-        // ---
-
-        // Define positions for the 5 choices in the 3D scene
-        // These are example positions, you'll need to adjust them.
-        const choicePositions = [
-            new BABYLON.Vector3(-2, 0.3, 2.5), // Choice 1
-            new BABYLON.Vector3(-1, 0.3, 2.5), // Choice 2
-            new BABYLON.Vector3(0, 0.3, 2.5),  // Choice 3
-            new BABYLON.Vector3(1, 0.3, 2.5),  // Choice 4
-            new BABYLON.Vector3(2, 0.3, 2.5)   // Choice 5
-        ];
-
-        for (let i = 0; i < foodOptionNames.length; i++) {
-            const foodName = foodOptionNames[i];
-            const foodData = GAME_DATA.foods.find(f => f.name === foodName);
-            const foodAsset = currentFoodAssets[foodName]; // Get preloaded asset
-
-            if (foodAsset && foodAsset.rootMesh && foodData) {
-                foodAsset.rootMesh.isVisible = true;
-                foodAsset.rootMesh.position = choicePositions[i] || foodData.displayPosition || new BABYLON.Vector3(i*1.5 - 3, 0.3, 2); // Use defined slot or fallback
-                foodAsset.rootMesh.name = `foodChoice_${foodName}`; // For picking
-                // Apply scale from GAME_DATA if not already applied during preload
-                if (foodData.scale && (foodAsset.rootMesh.scaling.x !== foodData.scale.x)) { // Basic check
-                    foodAsset.rootMesh.scaling = new BABYLON.Vector3(foodData.scale.x, foodData.scale.y, foodData.scale.z);
-                }
-                displayedFoodModels.push(foodAsset); // Add to list of currently shown foods
-            } else {
-                console.warn(`Asset for food choice ${foodName} not found or not loaded.`);
-                // Fallback: Create an HTML button if 3D model is missing
-                // This keeps the old HTML button bar relevant for fallbacks
-                foodChoicesBar.style.display = 'flex'; // Show HTML button bar
-                const foodButton = document.createElement('button');
-                foodButton.innerText = foodName;
-                foodButton.dataset.foodName = foodName; 
-                foodButton.classList.add('food-choice-button'); 
-                foodButton.addEventListener('click', handleFoodChoice); // HTML button click
-                foodChoicesBar.appendChild(foodButton);
-            }
-        }
-        // TODO: Implement picking for the 3D food models in the next step
-        // For now, HTML buttons might still work if 3D setup has issues.
-        // If we are fully committed to 3D food, the HTML foodChoicesBar might be hidden permanently.
-        if (displayedFoodModels.length > 0 && foodChoicesBar.innerHTML === '') { // If we successfully showed 3D models and no HTML buttons were made
-             foodChoicesBar.style.display = 'none';
-        } else if (displayedFoodModels.length === 0) { // No 3D models shown, ensure HTML bar is visible
-             foodChoicesBar.style.display = 'flex';
-             // Populate with HTML buttons if setup3DFoodChoices failed to show any 3D models
-             if(foodChoicesBar.innerHTML === '') setupFallbackHtmlFoodChoices(foodOptionNames);
-        }
-    }
-    
-    // Fallback if 3D models aren't ready for choices
-    function setupFallbackHtmlFoodChoices(foodOptionNames) {
-        foodChoicesBar.innerHTML = '';
-        foodOptionNames.forEach(foodName => {
-            const foodButton = document.createElement('button');
-            foodButton.innerText = foodName;
-            foodButton.dataset.foodName = foodName;
-            foodButton.classList.add('food-choice-button');
-            foodButton.addEventListener('click', handleFoodChoice);
-            foodChoicesBar.appendChild(foodButton);
-        });
-        foodChoicesBar.style.display = 'flex';
-    }
-
-
-    // MODIFIED to handle 3D food visibility and HTML bar
-    async function handleFoodChoice(eventOrFoodName) {
-        if (!isAcceptingInput) return;
-        isAcceptingInput = false;
-
-        let chosenFoodName;
-        if (typeof eventOrFoodName === 'string') {
-            chosenFoodName = eventOrFoodName; // Called from 3D pick
-        } else {
-            chosenFoodName = eventOrFoodName.target.dataset.foodName; // Called from HTML button
-        }
-        console.log(`Chose food: ${chosenFoodName}`);
-
-        // Hide all 3D food choices and the HTML button bar
-        displayedFoodModels.forEach(foodAsset => {
-            if (foodAsset && foodAsset.rootMesh) foodAsset.rootMesh.isVisible = false;
-        });
-        foodChoicesBar.style.display = 'none'; // Hide HTML bar
-
-        const chosenFoodAsset = currentFoodAssets[chosenFoodName];
-        let foodToAnimate = null;
-
-        if (chosenFoodAsset && chosenFoodAsset.rootMesh) {
-            // Make a temporary clone for animation or use the original if careful
-            // For simplicity now, let's just move the original.
-            // It will be re-positioned/hidden by the next setup3DFoodChoices call.
-            foodToAnimate = chosenFoodAsset.rootMesh;
-            foodToAnimate.isVisible = true; // Ensure the chosen one is visible
-            // TODO: Animate foodToAnimate towards currentAnimalData.targetEatPosition
-            // For now, just make it jump there before eat animation
-            if (currentAnimalData.targetEatPosition) {
-                foodToAnimate.position = currentAnimalData.targetEatPosition.clone().add(currentAnimalData.asset.rootMesh.position);
-            }
-        }
-
-        if (chosenFoodName === currentAnimalData.correctFood) {
-            console.log("Correct!");
-            const eatAnim = playAnimation(currentAnimalData.asset, currentAnimalData.eatAnim || "eat", false);
-            if (eatAnim) {
-                eatAnim.onAnimationEndObservable.addOnce(() => {
-                    if (foodToAnimate) foodToAnimate.isVisible = false; // Hide food after eating
-                    const happyAnim = playAnimation(currentAnimalData.asset, currentAnimalData.happyAnim || "happy", false);
-                    if (happyAnim) {
-                        happyAnim.onAnimationEndObservable.addOnce(() => nextAnimalButton.style.display = 'block');
-                    } else { nextAnimalButton.style.display = 'block'; }
-                    isAcceptingInput = true; // Re-enable for Next button
-                });
-            } else { /* ... (no eat anim logic, play happy, show button) ... */
-                if (foodToAnimate) foodToAnimate.isVisible = false;
-                const happyAnim = playAnimation(currentAnimalData.asset, currentAnimalData.happyAnim || "happy", false);
-                if (happyAnim) happyAnim.onAnimationEndObservable.addOnce(() => nextAnimalButton.style.display = 'block');
-                else nextAnimalButton.style.display = 'block';
-                isAcceptingInput = true;
-            }
-        } else { /* ... (Incorrect choice: shrug anim, then re-show 3D/HTML food choices) ... */
-            console.log("Incorrect!");
-            if (foodToAnimate) foodToAnimate.isVisible = false; // Hide wrongly chosen food
-            const shrugAnim = playAnimation(currentAnimalData.asset, currentAnimalData.shrugAnim || "shrug", false);
-            if (shrugAnim) {
-                shrugAnim.onAnimationEndObservable.addOnce(() => {
-                    setup3DFoodChoices(); // Re-show choices
-                    isAcceptingInput = true;
-                });
-            } else { 
-                setup3DFoodChoices(); // Re-show choices
-                isAcceptingInput = true;
-            }
-        }
-    }
-    
-    function proceedToNextAnimal() { /* ... REMAINS THE SAME ... */ }
-    function playAnimation(asset, animationName, loop = true) { /* ... REMAINS THE SAME ... */ }
-
     // --- EVENT LISTENERS ---
-    // ... (startGameButton, nextAnimalButton listeners - REMAINS THE SAME) ...
-    startGameButton.addEventListener('click', initializeGame);
-    nextAnimalButton.addEventListener('click', () => {
-        // isAcceptingInput is now controlled within handleFoodChoice and loadAndDisplayCurrentAnimal
-        // so this direct check might not be needed if those functions manage it properly.
-        // However, as a safeguard:
-        if (!isAcceptingInput && nextAnimalButton.style.display === 'block') {
-            // This case might happen if animations end but isAcceptingInput wasn't reset.
-            // Or, if the button is clicked rapidly.
-            console.warn("Still processing, Next Animal click ignored for now.");
-            // For robustness, we can force isAcceptingInput to true here if button is visible
-            // Or rely on the animation end callbacks.
-            // Let's assume callbacks handle it. If not, this is a place to debug.
-        }
-        proceedToNextAnimal();
+    // These MUST be able to find their callback functions.
+    startGameButton.addEventListener('click', () => {
+        initializeGame(); // Call the async function
     });
-});
+    nextAnimalButton.addEventListener('click', () => {
+        // isAcceptingInput check is good here to prevent rapid clicks while transitioning
+        if (isAcceptingInput || nextAnimalButton.style.display === 'block') { 
+            proceedToNextAnimal();
+        } else {
+            console.warn("Next Animal button clicked, but not accepting input or button not fully ready.");
+        }
+    });
+
+}); // End of DOMContentLoaded
