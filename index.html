@@ -1,34 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My First Animal Game</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="https://cdn.babylonjs.com/babylon.js"></script>
-    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
-    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+  <title>My First Animal Game</title>
+
+  <!-- styles & Babylon JS -->
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://cdn.babylonjs.com/babylon.js"></script>
+  <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+  <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 </head>
+
 <body>
-    <div class="screen-center-wrapper" id="startScreenWrapper">
-        <div id="startScreen">
-            <h1>My First Animal Game</h1>
-            <button id="startGameButton">Start Game</button>
-        </div>
+  <!-- start screen -->
+  <div class="screen-center-wrapper" id="startScreenWrapper">
+    <div id="startScreen">
+      <h1>My First Animal Game</h1>
+      <button id="startGameButton">Start&nbsp;Game</button>
+    </div>
+  </div>
+
+  <!-- full-screen play area -->
+  <div id="gameArea" style="display:none;">
+    <!-- LEFT COLUMN : animals -->
+    <div id="animalQueueBar">
+      <span class="animal-queue-slot" id="slot-prev"></span>
+      <span class="animal-queue-slot current" id="slot-current">Animal</span>
+      <span class="animal-queue-slot" id="slot-next"></span>
     </div>
 
-    <div id="gameArea" style="display: none;">
-        <div id="animalQueueBar">
-            <span class="animal-queue-slot" id="slot-prev"></span>
-            <span class="animal-queue-slot current" id="slot-current">Animal</span>
-            <span class="animal-queue-slot" id="slot-next"></span>
-        </div>
-        <canvas id="renderCanvas"></canvas>
-        <div id="foodChoicesBar"> 
-            <!-- This will now primarily be hidden if 3D food works -->
-        </div>
-        <button id="nextAnimalButton" style="display: none;">Next Animal</button>
-    </div>
-    <script src="js/main.js"></script>
+    <!-- CENTRE : Babylon JS canvas -->
+    <canvas id="renderCanvas"></canvas>
+
+    <!-- RIGHT COLUMN : food -->
+    <div id="foodChoicesBar"></div>
+
+    <button id="nextAnimalButton" style="display:none;">Next Animal</button>
+  </div>
+
+  <script src="js/main.js"></script>
 </body>
 </html>
