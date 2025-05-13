@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My First Animal Game</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Babylon.js CDN -->
+    <script src="https://cdn.babylonjs.com/babylon.js"></script>
+    <!-- Optional: Babylon.js GUI for 2D UI elements -->
+    <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
+    <!-- Optional: Babylon.js Loaders for .glb/.gltf files -->
+    <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+</head>
+<body>
+    <!-- Start Screen (Initially hidden by CSS or JS) -->
+    <div id="startScreen">
+        <h1>My First Animal Game</h1>
+        <button id="startGameButton">Start Game</button>
+    </div>
+
+    <!-- Main Game Area (Initially hidden by CSS or JS) -->
+    <div id="gameArea" style="display: none;">
+        <!-- Top Animal Queue Bar -->
+        <div id="animalQueueBar">
+            <!-- Animal slots will be dynamically populated by JS -->
+        </div>
+
+        <!-- Babylon.js Canvas (where the 3D scene will render) -->
+        <canvas id="renderCanvas"></canvas>
+
+        <!-- Bottom Food Choices Bar -->
+        <div id="foodChoicesBar">
+            <!-- Food choice buttons will be dynamically populated by JS -->
+        </div>
+
+        <!-- Next Animal Button (Initially hidden) -->
+        <button id="nextAnimalButton" style="display: none;">Next Animal</button>
+    </div>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
