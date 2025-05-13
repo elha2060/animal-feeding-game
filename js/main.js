@@ -24,13 +24,21 @@ window.addEventListener('DOMContentLoaded', () => {
     const ASSET_PATHS = {
         // Animals
         monkey: "assets/models/monkey/monkey.glb",
-        // cat: "assets/models/cat/cat.glb", // Example for later
-        // Foods
+        cat: "assets/models/cat/cat.glb",
+        mouse: "assets/models/mouse/mouse.glb",
+        dog: "assets/models/dog/dog.glb",
+        whale: "assets/models/whale/whale.glb",
+        //Foods
         banana: "assets/models/banana/banana.glb",
-        // milk: "assets/models/milk/milk.glb", // Example for later
-        // fish: "assets/models/fish/fish.glb", // Example for later
-        // pizza: "assets/models/pizza/pizza.glb", // Example for later
-        // hay: "assets/models/hay/hay.glb", // Example for later
+        milk: "assets/models/milk/milk.glb",
+        fish: "assets/models/fish/fish.glb",
+        pizza: "assets/models/pizza/pizza.glb",
+        hay: "assets/models/hay/hay.glb",
+        croissant: "assets/models/croissant/croissant.glb",
+        truck: "assets/models/truck/truck.glb",
+        flower: "assets/models/flower/flower.glb",
+        bone: "assets/models/bone/bone.glb",
+        cheese: "assets/models/cheese/cheese.glb"
     };
 
     // --- GAME DATA DEFINITION ---
@@ -42,23 +50,67 @@ window.addEventListener('DOMContentLoaded', () => {
                 correctFood: "Banana",
                 sound: "assets/sounds/monkey_sound.mp3", // Placeholder
                 asset: null, // Will store loaded Babylon asset container
-                idleAnim: "idle", // Assuming animation name
-                eatAnim: "eat",   // Assuming animation name
-                happyAnim: "happy", // Assuming animation name
-                shrugAnim: "shrug"  // Assuming animation name
+                idleAnim: "idle", 
+                eatAnim: "Eating",  
+                happyAnim: "Gallop", 
+                shrugAnim: "Death" 
             },
-            // TODO: Add Cat, Whale, Dog, Mouse data here later
-            // { name: "Cat", modelPath: ASSET_PATHS.cat, correctFood: "Milk", sound: "...", asset: null, idleAnim:"cat_idle", ... },
+            { 
+                name: "Dog", 
+                modelPath: ASSET_PATHS.dog, 
+                correctFood: "Bone",
+                sound: "assets/sounds/dog_sound.mp3", // Placeholder
+                asset: null, 
+                idleAnim: "idle", 
+                eatAnim: "Eating",  
+                happyAnim: "Gallop", 
+                shrugAnim: "Death" 
+            },
+            { 
+                name: "Cat", 
+                modelPath: ASSET_PATHS.cat, 
+                correctFood: "Milk",
+                sound: "assets/sounds/cat_sound.mp3", // Placeholder
+                asset: null, 
+                idleAnim: "idle", 
+                eatAnim: "Eating",  
+                happyAnim: "Gallop", 
+                shrugAnim: "Death" 
+            },
+            { 
+                name: "Whale", 
+                modelPath: ASSET_PATHS.whale, 
+                correctFood: "Fish",
+                sound: "assets/sounds/whale_sound.mp3", // Placeholder
+                asset: null, 
+                idleAnim: "idle", 
+                eatAnim: "Eating",  
+                happyAnim: "Gallop", 
+                shrugAnim: "Death" 
+            },
+            { 
+                name: "Mouse", 
+                modelPath: ASSET_PATHS.mouse, 
+                correctFood: "Cheese",
+                sound: "assets/sounds/mouse_sound.mp3", // Placeholder
+                asset: null, 
+                idleAnim: "idle", 
+                eatAnim: "Eating",  
+                happyAnim: "Gallop", 
+                shrugAnim: "Death" 
+            },
         ],
         foods: [ // All available food items in the game
             { name: "Banana", modelPath: ASSET_PATHS.banana, asset: null },
-            { name: "Milk", modelPath: ASSET_PATHS.milk, asset: null }, // Example
-            { name: "Fish", modelPath: ASSET_PATHS.fish, asset: null }, // Example
-            { name: "Bone", modelPath: null, asset: null }, // Example, path to be added
-            { name: "Cheese", modelPath: null, asset: null }, // Example, path to be added
-            { name: "Pizza", modelPath: ASSET_PATHS.pizza, asset: null }, // Example
-            { name: "Hay", modelPath: ASSET_PATHS.hay, asset: null }, // Example
-            // TODO: Add Flower, Shark, Croissant data here later
+            { name: "Milk", modelPath: ASSET_PATHS.milk, asset: null }, 
+            { name: "Fish", modelPath: ASSET_PATHS.fish, asset: null }, 
+            { name: "Bone", modelPath: ASSET_PATHS.bone, asset: null }, 
+            { name: "Cheese", modelPath: ASSET_PATHS.cheese, asset: null }, 
+            { name: "Pizza", modelPath: ASSET_PATHS.pizza, asset: null }, 
+            { name: "Hay", modelPath: ASSET_PATHS.hay, asset: null }, 
+            { name: "Croissant", modelPath: ASSET_PATHS.croissant, asset: null }, 
+            { name: "Truck", modelPath: ASSET_PATHS.truck, asset: null }, 
+            { name: "Flower", modelPath: ASSET_PATHS.flower, asset: null }, 
         ]
     };
 
