@@ -1,49 +1,69 @@
-/* === PREVIOUS CSS REMAINS THE SAME === */
-/* Basic Reset & Body Styling */
-body, html { margin:0; padding:0; font-family:'Arial',sans-serif; background-color:#f0f8ff; color:#333; min-height:100vh; overflow-x:hidden; }
-.screen-center-wrapper { display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; width:100%; padding:10px; box-sizing:border-box; }
-#startScreen { text-align:center; padding:30px; background-color:#fff; border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1); max-width:500px; width:90%; }
-#startScreen h1 { color:#5a8c5a; margin-bottom:20px; font-size:1.8em; }
-#startGameButton { padding:12px 25px; font-size:1.3em; color:white; background-color:#7fbf7f; border:none; border-radius:5px; cursor:pointer; transition:background-color 0.3s ease; }
-#startGameButton:hover { background-color:#6aa86a; }
-#gameArea { width:90%; max-width:1000px; min-width:320px; height:90vh; max-height:700px; margin:5vh auto; display:flex; flex-direction:column; background-color:#e6f2ff; border-radius:10px; box-shadow:0 4px 12px rgba(0,0,0,0.15); padding:10px; box-sizing:border-box; }
-
-/* Animal Queue Bar Styling */
-#animalQueueBar {
-    width: 100%;
-    height: 50px; /* Adjusted height */
-    background-color: #d0e0f0; /* Slightly different color */
-    margin-bottom: 10px;
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: space-around; 
-    padding: 0 10px;
-    box-sizing: border-box;
-    flex-shrink: 0; 
-    font-size: 0.9em;
-    color: #334;
-}
-.animal-queue-slot {
-    padding: 5px 10px;
-    opacity: 0.6;
-}
-.animal-queue-slot.current {
-    font-weight: bold;
-    font-size: 1.1em;
-    opacity: 1;
-    color: #2a5298;
-    border: 1px solid #adc8e6;
-    background-color: #e0eaf7;
-    border-radius: 4px;
+/* --- RESET / GLOBALS (unchanged) ----------------------------------------- */
+body,html{
+  margin:0;border:0;padding:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f0f8ff;color:#333;
+  width:100vw;height:100vh;overflow:hidden;
 }
 
+/* --- START SCREEN (unchanged) ------------------------------------------- */
+.screen-center-wrapper{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;width:100%}
+#startScreen{background:#fff;padding:30px;border-radius:10px;box-shadow:0 4px 8px rgba(0,0,0,.1);text-align:center}
+#startScreen h1{margin:0 0 20px;color:#5a8c5a;font-size:1.8em}
+#startGameButton{padding:12px 25px;font-size:1.3em;color:#fff;background:#7fbf7f;border:0;border-radius:5px;cursor:pointer}
+#startGameButton:hover{background:#6aa86a}
 
-#renderCanvas { width:100%; flex:1 1 0; min-height:0; outline:none; border-radius:5px; }
-#foodChoicesBar { width:100%; height:80px; background-color:#d9e6f2; margin-top:10px; border-radius:5px; display:flex; align-items:center; justify-content:space-around; padding:0 10px; box-sizing:border-box; flex-shrink:0; }
-.food-choice-button { padding:10px 15px; font-size:1em; margin:0 5px; background-color:#f8f9fa; border:1px solid #dee2e6; border-radius:5px; cursor:pointer; transition:background-color 0.2s ease, transform 0.1s ease; min-width:80px; text-align:center; }
-.food-choice-button:hover { background-color:#e9ecef; }
-.food-choice-button:active { transform:scale(0.95); }
-#nextAnimalButton { position:absolute; right:calc(5% + 20px); bottom:calc(5vh + 20px); padding:8px 15px; font-size:1em; color:white; background-color:#5c85d6; border:none; border-radius:5px; cursor:pointer; transition:background-color 0.3s ease; z-index:10; }
-#nextAnimalButton:hover { background-color:#4a6aa8; }
-.hidden { display:none !important; }
+/* --- PLAY AREA ----------------------------------------------------------- */
+#gameArea{
+  position:fixed;top:0;left:0;
+  width:100vw;height:100vh;
+  display:flex;flex-direction:row;
+  background:#e6f2ff;box-sizing:border-box;
+}
+
+/* LEFT : animal column */
+#animalQueueBar{
+  width:220px;          /* fixed sidebar width */
+  height:100%;
+  background:#d0e0f0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;
+  padding:10px;box-sizing:border-box;
+  overflow-y:auto;      /* keep long queues scrollable */
+}
+.animal-queue-slot{padding:8px 6px;opacity:.6}
+.animal-queue-slot.current{font-weight:700;opacity:1;color:#2a5298;border:1px solid #adc8e6;background:#e0eaf7;border-radius:4px}
+
+/* CENTRE : canvas grows */
+#renderCanvas{
+  flex:1;min-width:0;min-height:0;
+  outline:none;border:0;
+}
+
+/* RIGHT : food column */
+#foodChoicesBar{
+  width:220px;
+  height:100%;
+  background:#d9e6f2;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:flex-start;
+  padding:10px;box-sizing:border-box;
+  overflow-y:auto;
+}
+.food-choice-button{
+  width:100%;margin:6px 0;padding:10px 0;
+  background:#f8f9fa;border:1px solid #dee2e6;border-radius:5px;
+  cursor:pointer;text-align:center;transition:background .2s,transform .1s;
+}
+.food-choice-button:hover{background:#e9ecef}
+.food-choice-button:active{transform:scale(.95)}
+
+/* floating “Next animal” keeps same look */
+#nextAnimalButton{
+  position:absolute;right:240px;bottom:20px;
+  padding:8px 15px;font-size:1em;color:#fff;background:#5c85d6;border:0;border-radius:5px;cursor:pointer
+}
+#nextAnimalButton:hover{background:#4a6aa8}
+
+/* utility */
+.hidden{display:none!important}
