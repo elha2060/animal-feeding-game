@@ -429,9 +429,18 @@ window.addEventListener('DOMContentLoaded', () => {
         currentAnimalIndex++;
         loadAndDisplayCurrentAnimal();
     }
+    
+    function goFullScreen(el) {
+        if (el.requestFullscreen)        { el.requestFullscreen(); }
+            else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
+            else if (el.msRequestFullscreen) { el.msRequestFullscreen(); }
+    }
 
     // --- EVENT LISTENERS ---
-    startGameButton.addEventListener('click', initializeGame);
+    window.addEventListener('resize', () => engine.resize());
+    document.addEventListener('fullscreenchange', () => engine.resize());
+    startGameButton.addEventListener('click', () => {
+    goFullScreen(document.documentElement); initializeGame});
     nextAnimalButton.addEventListener('click', () => {
         if (nextAnimalButton.style.display === 'block') { // Only if button is truly active
              proceedToNextAnimal();
