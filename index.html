@@ -12,6 +12,7 @@
 </head>
 
 <body>
+  <!-- START SCREEN -->
   <div class="screen-center-wrapper" id="startScreenWrapper">
     <div id="startScreen">
       <h1>My First Animal Game</h1>
@@ -19,22 +20,24 @@
     </div>
   </div>
 
+  <!-- GAME AREA -->
   <div id="gameArea" style="display:none;">
-    <!-- LEFT : queue -->
+    <!-- left column : rolling queue (5 names) -->
     <ul id="animalQueueBar">
       <li class="animal-queue-slot" id="slot-2"></li>
       <li class="animal-queue-slot" id="slot-prev"></li>
       <li class="animal-queue-slot current" id="slot-current">Animal</li>
       <li class="animal-queue-slot" id="slot-next"></li>
-      <li class="animal-queue-slot" id="slot+2"></li>
+      <li class="animal-queue-slot" id="slot-plus2"></li>
     </ul>
 
-    <!-- CENTRE : main canvas -->
+    <!-- centre : Babylon canvas -->
     <canvas id="renderCanvas"></canvas>
 
-    <!-- RIGHT : HTML fallback (rarely used) -->
+    <!-- right column : fallback HTML buttons -->
     <div id="foodChoicesBar"></div>
 
+    <!-- floating “next” -->
     <button id="nextAnimalButton" style="display:none;">Next Animal</button>
   </div>
 
