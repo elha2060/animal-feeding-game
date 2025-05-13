@@ -5,13 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My First Animal Game</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- Babylon.js CDN -->
     <script src="https://cdn.babylonjs.com/babylon.js"></script>
     <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
     <script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
 </head>
 <body>
-    <!-- Wrapper for centering content like the start screen -->
     <div class="screen-center-wrapper" id="startScreenWrapper">
         <div id="startScreen">
             <h1>My First Animal Game</h1>
@@ -19,25 +17,18 @@
         </div>
     </div>
 
-    <!-- Main Game Area (Initially hidden by CSS or JS) -->
     <div id="gameArea" style="display: none;">
-        <!-- Top Animal Queue Bar -->
         <div id="animalQueueBar">
-            <!-- Animal slots will be dynamically populated by JS -->
+            <span class="animal-queue-slot" id="slot-prev"></span>
+            <span class="animal-queue-slot current" id="slot-current">Animal</span>
+            <span class="animal-queue-slot" id="slot-next"></span>
         </div>
-
-        <!-- Babylon.js Canvas (where the 3D scene will render) -->
         <canvas id="renderCanvas"></canvas>
-
-        <!-- Bottom Food Choices Bar -->
-        <div id="foodChoicesBar">
-            <!-- Food choice buttons will be dynamically populated by JS -->
+        <div id="foodChoicesBar"> 
+            <!-- This will now primarily be hidden if 3D food works -->
         </div>
-
-        <!-- Next Animal Button (Initially hidden) -->
         <button id="nextAnimalButton" style="display: none;">Next Animal</button>
     </div>
-
     <script src="js/main.js"></script>
 </body>
 </html>
