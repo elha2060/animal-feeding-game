@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>My First Animal Game</title>
 
-  <!-- styles & Babylon JS -->
   <link rel="stylesheet" href="css/style.css" />
   <script src="https://cdn.babylonjs.com/babylon.js"></script>
   <script src="https://cdn.babylonjs.com/gui/babylon.gui.min.js"></script>
@@ -13,7 +12,6 @@
 </head>
 
 <body>
-  <!-- start screen -->
   <div class="screen-center-wrapper" id="startScreenWrapper">
     <div id="startScreen">
       <h1>My First Animal Game</h1>
@@ -21,19 +19,20 @@
     </div>
   </div>
 
-  <!-- full-screen play area -->
   <div id="gameArea" style="display:none;">
-    <!-- LEFT COLUMN : animals -->
-    <div id="animalQueueBar">
-      <span class="animal-queue-slot" id="slot-prev"></span>
-      <span class="animal-queue-slot current" id="slot-current">Animal</span>
-      <span class="animal-queue-slot" id="slot-next"></span>
-    </div>
+    <!-- LEFT : queue -->
+    <ul id="animalQueueBar">
+      <li class="animal-queue-slot" id="slot-2"></li>
+      <li class="animal-queue-slot" id="slot-prev"></li>
+      <li class="animal-queue-slot current" id="slot-current">Animal</li>
+      <li class="animal-queue-slot" id="slot-next"></li>
+      <li class="animal-queue-slot" id="slot+2"></li>
+    </ul>
 
-    <!-- CENTRE : Babylon JS canvas -->
+    <!-- CENTRE : main canvas -->
     <canvas id="renderCanvas"></canvas>
 
-    <!-- RIGHT COLUMN : food -->
+    <!-- RIGHT : HTML fallback (rarely used) -->
     <div id="foodChoicesBar"></div>
 
     <button id="nextAnimalButton" style="display:none;">Next Animal</button>
