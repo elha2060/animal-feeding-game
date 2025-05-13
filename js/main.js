@@ -1,28 +1,71 @@
 // Wait for the DOM to be fully loaded before running game logic
 window.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
-    const startScreenWrapper = document.getElementById('startScreenWrapper'); // MODIFIED
+    const startScreenWrapper = document.getElementById('startScreenWrapper');
     const gameArea = document.getElementById('gameArea');
-    const startGameButton = document.getElementById('startGameButton'); // Still inside startScreen, so this is fine
+    const startGameButton = document.getElementById('startGameButton');
     const renderCanvas = document.getElementById('renderCanvas');
+    const foodChoicesBar = document.getElementById('foodChoicesBar');
+    // const animalQueueBar = document.getElementById('animalQueueBar'); // Will use later
+    // const nextAnimalButton = document.getElementById('nextAnimalButton'); // Will use later
+
 
     // Babylon.js Essentials
     let engine;
     let scene;
-    let currentAnimalAsset; // To store the loaded animal asset container
-    // More game state variables will be declared here later
+    
+    // Game State / Assets
+    let currentAnimalData; // Holds data for the current animal (name, correct food, model asset)
+    let currentFoodAssets = {}; // Stores loaded food model assets { foodName: asset }
+    let allGameAnimals = []; // Array to hold all animal data objects
+    let currentAnimalIndex = 0; // To track the current animal in the queue
 
     // Asset paths (centralize for easier management)
     const ASSET_PATHS = {
-        monkey: "assets/models/monkey/monkey.glb", // Ensure this path is correct
-        banana: "assets/models/banana/banana.glb"  // Ensure this path is correct
-        // Add other animals and foods here later
+        // Animals
+        monkey: "assets/models/monkey/monkey.glb",
+        // cat: "assets/models/cat/cat.glb", // Example for later
+        // Foods
+        banana: "assets/models/banana/banana.glb",
+        // milk: "assets/models/milk/milk.glb", // Example for later
+        // fish: "assets/models/fish/fish.glb", // Example for later
+        // pizza: "assets/models/pizza/pizza.glb", // Example for later
+        // hay: "assets/models/hay/hay.glb", // Example for later
+    };
+
+    // --- GAME DATA DEFINITION ---
+    const GAME_DATA = {
+        animals: [
+            { 
+                name: "Monkey", 
+                modelPath: ASSET_PATHS.monkey, 
+                correctFood: "Banana",
+                sound: "assets/sounds/monkey_sound.mp3", // Placeholder
+                asset: null, // Will store loaded Babylon asset container
+                idleAnim: "idle", // Assuming animation name
+                eatAnim: "eat",   // Assuming animation name
+                happyAnim: "happy", // Assuming animation name
+                shrugAnim: "shrug"  // Assuming animation name
+            },
+            // TODO: Add Cat, Whale, Dog, Mouse data here later
+            // { name: "Cat", modelPath: ASSET_PATHS.cat, correctFood: "Milk", sound: "...", asset: null, idleAnim:"cat_idle", ... },
+        ],
+        foods: [ // All available food items in the game
+            { name: "Banana", modelPath: ASSET_PATHS.banana, asset: null },
+            { name: "Milk", modelPath: ASSET_PATHS.milk, asset: null }, // Example
+            { name: "Fish", modelPath: ASSET_PATHS.fish, asset: null }, // Example
+            { name: "Bone", modelPath: null, asset: null }, // Example, path to be added
+            { name: "Cheese", modelPath: null, asset: null }, // Example, path to be added
+            { name: "Pizza", modelPath: ASSET_PATHS.pizza, asset: null }, // Example
+            { name: "Hay", modelPath: ASSET_PATHS.hay, asset: null }, // Example
+            // TODO: Add Flower, Shark, Croissant data here later
+        ]
     };
 
     // --- INITIALIZATION ---
     function initializeGame() {
-        startScreenWrapper.style.display = 'none'; // MODIFIED
-        gameArea.style.display = 'flex'; // Use 'flex' as per CSS for gameArea layout
+        startScreenWrapper.style.display = 'none';
+        gameArea.style.display = 'flex';
 
         engine = new BABYLON.Engine(renderCanvas, true, { stencil: true, preserveDrawingBuffer: true }, true);
         scene = createScene();
@@ -37,120 +80,202 @@ window.addEventListener('DOMContentLoaded', () => {
             engine.resize();
         });
 
-        loadFirstAnimal(); 
+        // Prepare game data (e.g., shuffle animals if desired, then load first)
+        allGameAnimals = GAME_DATA.animals; // For now, use in defined order
+        currentAnimalIndex = 0;
+
+        // Preload all food models (or common ones) - optional optimization
+        // For now, we'll load banana along with monkey, others on demand or later
+        
+        loadAndDisplayCurrentAnimal(); 
     }
 
     function createScene() {
         const scene = new BABYLON.Scene(engine);
-        const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 10, new BABYLON.Vector3(0, 1, 0), scene);
-        camera.attachControl(renderCanvas, true);
-        // Code-Critic: Reminder to adjust camera controls for final game.
-        // Lower camera radius for a closer view of the animal
-        camera.radius = 5; 
-        // Adjust target to be slightly higher if animals are taller
-        camera.target = new BABYLON.Vector3(0, 1.5, 0); // Adjusted for potentially taller model
-        // Limit beta (vertical angle) to prevent camera from going below ground or too high
-        camera.lowerBetaLimit = Math.PI / 4; // Prevents looking too far down
-        camera.upperBetaLimit = Math.PI / 2; // Prevents looking straight down from top
+        const camera = new BABYLON.ArcRotateCamera("camera", 
+            -Math.PI / 2,      // Alpha
+            Math.PI / 2.8,     // Beta (raised camera slightly for better view)
+            4.5,               // Radius (closer to animal)
+            new BABYLON.Vector3(0, 1.2, 0), // Target (slightly higher Y)
+            scene
+        );
+        // camera.attachControl(renderCanvas, true); // Keep for dev, disable for release
+        camera.lowerRadiusLimit = 3;
+        camera.upperRadiusLimit = 10;
+        camera.lowerBetaLimit = Math.PI / 4; 
+        camera.upperBetaLimit = Math.PI / 1.8; // Prevent looking too directly top-down
 
-        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0, 1, 0), scene);
-        light.intensity = 1.0; // Slightly increased intensity
+        const light = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(0.5, 1, 0.25), scene);
+        light.intensity = 1.2; // Slightly brighter
 
-        // Add a ground plane
-        const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 10, height: 10}, scene);
-        // Optional: Give the ground a simple material
+        const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 15, height: 15}, scene); // Larger ground
         const groundMaterial = new BABYLON.StandardMaterial("groundMat", scene);
-        groundMaterial.diffuseColor = new BABYLON.Color3(0.7, 0.85, 0.7); // A soft green
+        groundMaterial.diffuseColor = new BABYLON.Color3(0.6, 0.75, 0.6); // Greener
         ground.material = groundMaterial;
-        ground.position.y = 0; // Ensure ground is at Y=0
+        ground.position.y = 0;
 
-        scene.clearColor = new BABYLON.Color4(0.9, 0.95, 1, 1);
+        scene.clearColor = new BABYLON.Color4(0.85, 0.93, 1, 1); // Slightly adjusted pastel blue
         return scene;
     }
 
     // --- MODEL LOADING ---
     async function loadModel(modelPath, modelName, targetScene) {
-        // Code-Critic: Consider adding more robust error handling here.
+        if (!modelPath) {
+            console.warn(`No model path provided for ${modelName}. Skipping load.`);
+            return null;
+        }
         try {
-            // ImportMeshAsync returns an object with meshes, particleSystems, skeletons, animationGroups
             const result = await BABYLON.SceneLoader.ImportMeshAsync(
-                null, // meshNames: null to load all meshes
-                modelPath.substring(0, modelPath.lastIndexOf('/') + 1), // rootUrl: directory of the model
-                modelPath.substring(modelPath.lastIndexOf('/') + 1),    // sceneFilename: name of the .glb file
+                null, 
+                modelPath.substring(0, modelPath.lastIndexOf('/') + 1), 
+                modelPath.substring(modelPath.lastIndexOf('/') + 1),    
                 targetScene
             );
-
-            // The first mesh (result.meshes[0]) is often the root node or main mesh of the imported model.
-            // It might not be the visible mesh itself but a parent transform.
             const rootMesh = result.meshes[0];
-            rootMesh.name = modelName; // Assign a name for easier access later
-
-            console.log(`${modelName} loaded successfully. Meshes:`, result.meshes.length, "Animations:", result.animationGroups.length);
-            
-            // Store animation groups if any
-            if (result.animationGroups && result.animationGroups.length > 0) {
-                // Make sure animations are not playing by default unless intended
-                result.animationGroups.forEach(ag => ag.stop());
-            }
-            
+            rootMesh.name = modelName;
+            console.log(`${modelName} loaded. Animations: ${result.animationGroups.length}`);
+            result.animationGroups.forEach(ag => ag.stop());
             return { rootMesh, animationGroups: result.animationGroups, meshes: result.meshes };
-
         } catch (error) {
             console.error(`Error loading model ${modelName} from ${modelPath}:`, error);
-            // Code-Critic: Potentially show a user-friendly error message on screen.
             return null;
         }
     }
 
-    async function loadFirstAnimal() {
-        console.log("Loading first animal (Monkey)...");
-        currentAnimalAsset = await loadModel(ASSET_PATHS.monkey, "monkey", scene);
-
-        if (currentAnimalAsset && currentAnimalAsset.rootMesh) {
-            // Position and scale the monkey as needed
-            currentAnimalAsset.rootMesh.position = new BABYLON.Vector3(0, 0, 0); // Position at ground level
-            // Code-Critic: Scaling might be necessary depending on the original model size.
-            // currentAnimalAsset.rootMesh.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5); // Example scaling
-
-            // TODO: Play idle animation if available
-            playAnimation(currentAnimalAsset, "idle"); // Assuming an "idle" animation exists
-            console.log("Monkey loaded and positioned.");
-        } else {
-            console.error("Failed to load monkey model or rootMesh is undefined.");
+    // --- GAME FLOW & UI ---
+    async function loadAndDisplayCurrentAnimal() {
+        if (currentAnimalIndex >= allGameAnimals.length) {
+            console.log("All animals shown!"); // TODO: Implement game end or loop
+            // For now, just stop or reset
+            currentAnimalIndex = 0; // Loop back to first animal
+            // return; 
         }
 
-        // TODO: Load banana model (initially hidden or placed appropriately)
-        // const bananaAsset = await loadModel(ASSET_PATHS.banana, "banana", scene);
-        // if (bananaAsset && bananaAsset.rootMesh) {
-        //     bananaAsset.rootMesh.position = new BABYLON.Vector3(2, 0.5, 0); // Example position
-        //     bananaAsset.rootMesh.isVisible = false; // Hide it initially
-        // }
+        currentAnimalData = allGameAnimals[currentAnimalIndex];
+
+        // Clean up previous animal if any
+        if (scene.getMeshByName("current_animal_root")) {
+             scene.getMeshByName("current_animal_root").dispose();
+        }
+        // TODO: Also dispose of previous animal's other meshes and animation groups if necessary for memory
+
+        console.log(`Loading animal: ${currentAnimalData.name}`);
+        currentAnimalData.asset = await loadModel(currentAnimalData.modelPath, "current_animal_root", scene);
+
+        if (currentAnimalData.asset && currentAnimalData.asset.rootMesh) {
+            currentAnimalData.asset.rootMesh.position = new BABYLON.Vector3(0, 0, 0); 
+            // TODO: Add animal-specific scaling if needed in GAME_DATA
+            // currentAnimalData.asset.rootMesh.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5);
+            playAnimation(currentAnimalData.asset, currentAnimalData.idleAnim || "idle", true);
+            console.log(`${currentAnimalData.name} displayed.`);
+        } else {
+            console.error(`Failed to load/display ${currentAnimalData.name}.`);
+            // TODO: Handle this error more gracefully (e.g., skip animal, show error message)
+            currentAnimalIndex++;
+            loadAndDisplayCurrentAnimal(); // Try next animal
+            return;
+        }
+
+        // For now, always load banana as a test for food item.
+        // Later, this will be driven by food choices.
+        if (!currentFoodAssets["Banana"]) { // Load banana only once
+            const bananaData = GAME_DATA.foods.find(f => f.name === "Banana");
+            if (bananaData && bananaData.modelPath) {
+                currentFoodAssets["Banana"] = await loadModel(bananaData.modelPath, "banana_model", scene);
+                if (currentFoodAssets["Banana"] && currentFoodAssets["Banana"].rootMesh) {
+                    currentFoodAssets["Banana"].rootMesh.position = new BABYLON.Vector3(1.5, 0.5, 0.5); // Example position
+                    currentFoodAssets["Banana"].rootMesh.scaling = new BABYLON.Vector3(0.5, 0.5, 0.5); // Example scale
+                    // currentFoodAssets["Banana"].rootMesh.isVisible = false; // Will be controlled by UI
+                }
+            }
+        }
+        
+        setupFoodChoicesUI();
+        // TODO: Setup Animal Queue UI
+    }
+
+    function setupFoodChoicesUI() {
+        foodChoicesBar.innerHTML = ''; // Clear previous choices
+
+        // For MVP, we need 5 food choices: 1 correct, 4 distractors.
+        const correctFoodName = currentAnimalData.correctFood;
+        let foodOptions = [correctFoodName];
+        
+        // Get distractor foods (all foods minus the correct one)
+        let distractors = GAME_DATA.foods.filter(food => food.name !== correctFoodName)
+                                       .map(food => food.name);
+        
+        // Shuffle distractors and pick 4
+        distractors.sort(() => 0.5 - Math.random()); // Simple shuffle
+        foodOptions.push(...distractors.slice(0, 4));
+
+        // Ensure we have exactly 5 options if not enough distractors (pad if necessary)
+        while (foodOptions.length < 5 && GAME_DATA.foods.length > foodOptions.length) {
+            // Add more unique distractors if available
+            let potentialDistractor = GAME_DATA.foods.find(f => !foodOptions.includes(f.name))?.name;
+            if (potentialDistractor) foodOptions.push(potentialDistractor); else break;
+        }
+         // If still not 5, duplicate from existing distractors (less ideal, but fills spots)
+        let i = 0;
+        while (foodOptions.length < 5 && foodOptions.length > 0) {
+            foodOptions.push(foodOptions[i % distractors.length]); 
+            i++;
+        }
+
+
+        // Shuffle the final 5 options so correct one isn't always first
+        foodOptions.sort(() => 0.5 - Math.random());
+
+        foodOptions.forEach(foodName => {
+            const foodButton = document.createElement('button');
+            foodButton.innerText = foodName;
+            foodButton.dataset.foodName = foodName; // Store food name for click handler
+            foodButton.classList.add('food-choice-button'); // For styling
+            foodButton.addEventListener('click', handleFoodChoice);
+            foodChoicesBar.appendChild(foodButton);
+        });
+        // Code-Critic: Add CSS for .food-choice-button
+    }
+
+    function handleFoodChoice(event) {
+        const chosenFoodName = event.target.dataset.foodName;
+        console.log(`Chose food: ${chosenFoodName}`);
+
+        if (chosenFoodName === currentAnimalData.correctFood) {
+            console.log("Correct!");
+            playAnimation(currentAnimalData.asset, currentAnimalData.eatAnim || "eat", false);
+            // TODO: After eat animation, play happy animation
+            // TODO: Show "Next Animal" button
+        } else {
+            console.log("Incorrect!");
+            playAnimation(currentAnimalData.asset, currentAnimalData.shrugAnim || "shrug", false);
+            // TODO: Allow user to try again
+        }
     }
     
     // --- ANIMATION HANDLING ---
     function playAnimation(asset, animationName, loop = true) {
         if (!asset || !asset.animationGroups || asset.animationGroups.length === 0) {
-            console.warn(`No animation groups found for asset ${asset?.rootMesh?.name}`);
-            return;
+            console.warn(`No animation groups for ${asset?.rootMesh?.name}`);
+            return null; // Return null if no animation played
         }
-
-        // Try to find animation by name (case-insensitive partial match)
         const animGroup = asset.animationGroups.find(ag => ag.name.toLowerCase().includes(animationName.toLowerCase()));
-
         if (animGroup) {
             console.log(`Playing animation "${animGroup.name}" for ${asset.rootMesh.name}`);
-            animGroup.start(loop, 1.0, animGroup.from, animGroup.to, false);
+            // Stop all other animations on this asset before starting a new one
+            asset.animationGroups.forEach(ag => ag.stop());
+            animGroup.play(loop); // Simplified play, assumes full range. For specific frames: start(loop, speedRatio, from, to)
+            return animGroup;
         } else {
-            console.warn(`Animation "${animationName}" not found for ${asset.rootMesh.name}. Available animations:`, asset.animationGroups.map(ag => ag.name));
-            // Code-Critic: As a fallback, if specific "idle" isn't found, maybe play the first animation?
-            // Or, list available animations to help developer identify the correct name.
-            if(asset.animationGroups.length > 0 && animationName === "idle") {
-                console.log(`Attempting to play first available animation as idle: ${asset.animationGroups[0].name}`);
-                asset.animationGroups[0].start(loop, 1.0, asset.animationGroups[0].from, asset.animationGroups[0].to, false);
+            console.warn(`Anim "${animationName}" not found for ${asset.rootMesh.name}. Avail:`, asset.animationGroups.map(ag => ag.name));
+            if (asset.animationGroups.length > 0 && animationName.toLowerCase().includes("idle")) { // Broader check for idle
+                asset.animationGroups.forEach(ag => ag.stop());
+                asset.animationGroups[0].play(loop);
+                return asset.animationGroups[0];
             }
         }
+        return null; // No animation played
     }
-
 
     // --- EVENT LISTENERS ---
     startGameButton.addEventListener('click', initializeGame);
