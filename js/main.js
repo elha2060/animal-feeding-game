@@ -432,15 +432,20 @@ window.addEventListener('DOMContentLoaded', () => {
     
     function goFullScreen(el) {
         if (el.requestFullscreen)        { el.requestFullscreen(); }
-            else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
-            else if (el.msRequestFullscreen) { el.msRequestFullscreen(); }
+        else if (el.webkitRequestFullscreen) { el.webkitRequestFullscreen(); }
+        else if (el.msRequestFullscreen) { el.msRequestFullscreen(); }
     }
 
     // --- EVENT LISTENERS ---
-    window.addEventListener('resize', () => engine.resize());
-    document.addEventListener('fullscreenchange', () => engine.resize());
+    // Guard against resize events before the engine exists
+    window.addEventListener('resize', () => { if (engine) engine.resize(); });
+    document.addEventListener('fullscreenchange', () => { if (engine) engine.resize(); });
+
     startGameButton.addEventListener('click', () => {
-    goFullScreen(document.documentElement); initializeGame});
+        goFullScreen(document.documentElement);   // ask browser for full-screen
+        initializeGame();                         // start the game
+    });
+
     nextAnimalButton.addEventListener('click', () => {
         if (nextAnimalButton.style.display === 'block') { // Only if button is truly active
              proceedToNextAnimal();
