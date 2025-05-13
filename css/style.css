@@ -4,34 +4,47 @@ body, html {
     padding: 0;
     font-family: 'Arial', sans-serif; /* Placeholder font, can be changed */
     background-color: #f0f8ff; /* Soft AliceBlue - placeholder pastel */
-    overflow: hidden; /* Prevent scrollbars if canvas is full screen */
+    color: #333; /* Default text color */
+    /* Body will not be a primary flex container for centering gameArea */
+    /* but can be for overall page structure if needed */
+    min-height: 100vh; /* Ensure body takes at least full viewport height */
+    overflow-x: hidden; /* Prevent horizontal scrollbars on body if gameArea slightly overflows during resize */
+}
+
+/* Wrapper for centering full-screen-like views (e.g., Start Screen) */
+.screen-center-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh; /* Full viewport height */
-    color: #333; /* Default text color */
+    min-height: 100vh; /* Takes full viewport height */
+    width: 100%;
+    padding: 10px; /* Some padding so content isn't flush against edges */
+    box-sizing: border-box;
 }
 
 /* Start Screen Styling */
 #startScreen {
     text-align: center;
-    padding: 20px;
+    padding: 30px; /* Increased padding */
     background-color: #fff;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    max-width: 500px; /* Give start screen a max width */
+    width: 90%;      /* Make it responsive */
 }
 
 #startScreen h1 {
     color: #5a8c5a; /* A calm green - placeholder */
     margin-bottom: 20px;
+    font-size: 1.8em; /* Slightly larger */
 }
 
 #startGameButton {
-    padding: 10px 20px;
-    font-size: 1.2em;
+    padding: 12px 25px; /* Slightly larger */
+    font-size: 1.3em;   /* Slightly larger */
     color: white;
-    background-color: #7fbf7f; /* Lighter green - placeholder */
+    background-color: #7fbf7f; 
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -39,78 +52,90 @@ body, html {
 }
 
 #startGameButton:hover {
-    background-color: #6aa86a; /* Darker green on hover */
+    background-color: #6aa86a; 
 }
 
 /* Game Area Styling */
 #gameArea {
-    width: 100%;
-    max-width: 1000px; /* Max width for larger screens, adjust as needed */
-    height: 90vh; /* Adjust based on desired game area size */
-    max-height: 700px; /* Max height */
-    display: flex; /* Using flex for layout within gameArea is planned */
+    width: 90%; /* Take 90% of viewport width */
+    max-width: 1000px; /* But no more than 1000px */
+    min-width: 320px;  /* And no less than 320px (for very small views, though PC primary) */
+    
+    height: 90vh; /* Take 90% of viewport height */
+    max-height: 700px; /* But no more than 700px */
+    
+    margin: 5vh auto; /* Center the gameArea on the page vertically and horizontally */
+                      /* 5vh top/bottom margin makes it 90vh + 5vh + 5vh = 100vh total */
+
+    display: flex; 
     flex-direction: column;
-    align-items: center;
-    background-color: #e6f2ff; /* Slightly different pastel for game area */
+    /* align-items: center; /* We want children to stretch full width of gameArea */
+    background-color: #e6f2ff; 
     border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     padding: 10px;
     box-sizing: border-box;
+    /* Visibility will be controlled by JS, ensuring display:none initially from HTML */
 }
 
 /* Animal Queue Bar Styling */
 #animalQueueBar {
     width: 100%;
-    height: 60px; /* Example height */
-    background-color: #d9e6f2; /* Placeholder color */
+    height: 60px; 
+    background-color: #d9e6f2; 
     margin-bottom: 10px;
     border-radius: 5px;
     display: flex;
     align-items: center;
-    justify-content: space-around; /* For animal icons/silhouettes */
+    justify-content: space-around; 
     padding: 0 10px;
     box-sizing: border-box;
+    flex-shrink: 0; /* Prevent this bar from shrinking */
 }
 
 /* Render Canvas Styling */
 #renderCanvas {
-    width: 100%; /* Canvas will take width of its container */
-    #flex-grow: 1; /* Canvas will take available vertical space */
-    flex: 1 1 0;
-    min-height: 0;
-    #height: auto; /* Let flex-grow handle height or set explicitly */
-    outline: none; /* Remove default focus outline */
+    width: 100%; 
+    flex: 1 1 0; /* flex-grow: 1, flex-shrink: 1, flex-basis: 0 */
+    min-height: 0; /* Crucial for allowing canvas to shrink and grow correctly in flex column */
+    outline: none; 
+    border-radius: 5px; /* Optional: give canvas slightly rounded corners if desired */
     /* border: 1px solid #ccc; /* For debugging layout */
 }
 
 /* Food Choices Bar Styling */
 #foodChoicesBar {
     width: 100%;
-    height: 80px; /* Example height */
-    background-color: #d9e6f2; /* Placeholder color */
+    height: 80px; 
+    background-color: #d9e6f2; 
     margin-top: 10px;
     border-radius: 5px;
     display: flex;
     align-items: center;
-    justify-content: space-around; /* For food items */
+    justify-content: space-around; 
     padding: 0 10px;
     box-sizing: border-box;
+    flex-shrink: 0; /* Prevent this bar from shrinking */
 }
 
 /* Next Animal Button Styling */
 #nextAnimalButton {
-    position: absolute; /* We might adjust this based on final layout sketch */
-    left: 20px;
-    bottom: 20px; /* Position as per sketch (left-bottom of game area) */
+    position: absolute; 
+    /* Positioning will be relative to #gameArea if #gameArea has position:relative */
+    /* For now, let's assume it's fine relative to body or we place it inside a positioned #gameArea later */
+    /* Let's target bottom-right of the gameArea visually for now if gameArea is centered */
+    /* This will need JS to calculate position relative to gameArea or CSS change if button moved into gameArea */
+    right: calc(5% + 20px); /* Approx 5% margin of body + 20px offset */
+    bottom: calc(5vh + 20px);/* Approx 5vh margin of body + 20px offset */
     padding: 8px 15px;
     font-size: 1em;
     color: white;
-    background-color: #5c85d6; /* A blue - placeholder */
+    background-color: #5c85d6; 
     border: none;
     border-radius: 5px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    z-index: 10; /* Ensure it's above the canvas if overlapping */
+    z-index: 10; 
 }
 
 #nextAnimalButton:hover {
