@@ -13,11 +13,76 @@ window.addEventListener('DOMContentLoaded', () => {
         currentFoodAssets = {}, allGameAnimals = [], currentAnimalIndex = 0, 
         isAcceptingInput = true, displayedFoodMeshes = [];
 
-    const ASSET_PATHS = { /* YOUR ASSET_PATHS OBJECT from previous step */ };
-    const GAME_DATA = { /* YOUR GAME_DATA OBJECT from previous step, ENSURE IT'S FULLY POPULATED
-                           WITH scale, rotationY, targetEatPosition for animals,
-                           AND scale, displayPosition for foods.
-                           AND ***CORRECT*** animation names for EACH animal. */ };
+    const ASSET_PATHS = {
+        monkey: "assets/models/monkey/monkey.glb",
+        cat: "assets/models/cat/cat.glb",
+        mouse: "assets/models/mouse/mouse.glb",
+        dog: "assets/models/dog/dog.glb",
+        whale: "assets/models/whale/whale.glb",
+        banana: "assets/models/banana/banana.glb",
+        milk: "assets/models/milk/milk.glb",
+        fish: "assets/models/fish/fish.glb",
+        pizza: "assets/models/pizza/pizza.glb",
+        hay: "assets/models/hay/hay.glb",
+        croissant: "assets/models/croissant/croissant.glb",
+        truck: "assets/models/truck/truck.glb",
+        flower: "assets/models/flower/flower.glb",
+        bone: "assets/models/bone/bone.glb",
+        cheese: "assets/models/cheese/cheese.glb"
+    };
+
+    // GAME DATA DEFINITION
+    const GAME_DATA = {
+        animals: [
+            { 
+                name: "Monkey", modelPath: ASSET_PATHS.monkey, correctFood: "Banana",
+                sound: null, asset: null, 
+                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death",
+                scale: { x: 1, y: 1, z: 1 }, rotationY: 0,
+                targetEatPosition: new BABYLON.Vector3(0, 1.2, 0.5) 
+            },
+            { 
+                name: "Dog", modelPath: ASSET_PATHS.dog, correctFood: "Bone",
+                sound: null, asset: null, 
+                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", 
+                scale: { x: 1, y: 1, z: 1 }, rotationY: Math.PI,
+                targetEatPosition: new BABYLON.Vector3(0, 0.8, 0.6) 
+            },
+             { 
+                name: "Cat", modelPath: ASSET_PATHS.cat, correctFood: "Milk",
+                sound: null, asset: null, 
+                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", 
+                scale: { x: 1, y: 1, z: 1 }, rotationY: 0,
+                targetEatPosition: new BABYLON.Vector3(0, 0.6, 0.4)
+            },
+            { 
+                name: "Whale", modelPath: ASSET_PATHS.whale, correctFood: "Fish",
+                sound: null, asset: null, 
+                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", 
+                scale: { x: 2, y: 2, z: 2 }, rotationY: 0,
+                targetEatPosition: new BABYLON.Vector3(0, 1.5, 1)
+            },
+            { 
+                name: "Mouse", modelPath: ASSET_PATHS.mouse, correctFood: "Cheese",
+                sound: null, asset: null, 
+                idleAnim: "idle", eatAnim: "Eating", happyAnim: "Gallop", shrugAnim: "Death", 
+                scale: { x: 0.5, y: 0.5, z: 0.5 }, rotationY: 0,
+                targetEatPosition: new BABYLON.Vector3(0, 0.2, 0.2)
+            },
+        ],
+        foods: [ 
+            { name: "Banana", modelPath: ASSET_PATHS.banana, asset: null, scale: {x:0.5,y:0.5,z:0.5}, displayPosition: new BABYLON.Vector3(-2, 0.3, 2) },
+            { name: "Milk", modelPath: ASSET_PATHS.milk, asset: null, scale: {x:0.5,y:0.5,z:0.5}, displayPosition: new BABYLON.Vector3(-1, 0.3, 2) }, 
+            { name: "Fish", modelPath: ASSET_PATHS.fish, asset: null, scale: {x:0.5,y:0.5,z:0.5}, displayPosition: new BABYLON.Vector3(0, 0.3, 2) }, 
+            { name: "Bone", modelPath: ASSET_PATHS.bone, asset: null, scale: {x:0.5,y:0.5,z:0.5}, displayPosition: new BABYLON.Vector3(1, 0.3, 2) }, 
+            { name: "Cheese", modelPath: ASSET_PATHS.cheese, asset: null, scale: {x:0.5,y:0.5,z:0.5}, displayPosition: new BABYLON.Vector3(2, 0.3, 2) }, 
+            { name: "Pizza", modelPath: ASSET_PATHS.pizza, asset: null, scale: {x:0.3,y:0.3,z:0.3}, displayPosition: new BABYLON.Vector3(-2, 0.3, 2.5) }, 
+            { name: "Hay", modelPath: ASSET_PATHS.hay, asset: null, scale: {x:0.4,y:0.4,z:0.4}, displayPosition: new BABYLON.Vector3(-1, 0.3, 2.5) }, 
+            { name: "Croissant", modelPath: ASSET_PATHS.croissant, asset: null, scale: {x:0.3,y:0.3,z:0.3}, displayPosition: new BABYLON.Vector3(0, 0.3, 2.5) }, 
+            { name: "Truck", modelPath: ASSET_PATHS.truck, asset: null, scale: {x:0.4,y:0.4,z:0.4}, displayPosition: new BABYLON.Vector3(1, 0.3, 2.5) }, 
+            { name: "Flower", modelPath: ASSET_PATHS.flower, asset: null, scale: {x:0.3,y:0.3,z:0.3}, displayPosition: new BABYLON.Vector3(2, 0.3, 2.5) }, 
+        ]
+    };
 
     // --- INITIALIZATION & SCENE ---
     async function initializeGame() {
