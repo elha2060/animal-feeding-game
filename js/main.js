@@ -1,9 +1,9 @@
 // Wait for the DOM to be fully loaded before running game logic
 window.addEventListener('DOMContentLoaded', () => {
     // Get DOM elements
-    const startScreen = document.getElementById('startScreen');
+    const startScreenWrapper = document.getElementById('startScreenWrapper'); // MODIFIED
     const gameArea = document.getElementById('gameArea');
-    const startGameButton = document.getElementById('startGameButton');
+    const startGameButton = document.getElementById('startGameButton'); // Still inside startScreen, so this is fine
     const renderCanvas = document.getElementById('renderCanvas');
 
     // Babylon.js Essentials
@@ -21,8 +21,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // --- INITIALIZATION ---
     function initializeGame() {
-        startScreen.style.display = 'none';
-        gameArea.style.display = 'flex';
+        startScreenWrapper.style.display = 'none'; // MODIFIED
+        gameArea.style.display = 'flex'; // Use 'flex' as per CSS for gameArea layout
 
         engine = new BABYLON.Engine(renderCanvas, true, { stencil: true, preserveDrawingBuffer: true }, true);
         scene = createScene();
