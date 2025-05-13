@@ -146,3 +146,27 @@ body, html {
 .hidden {
     display: none !important;
 }
+
+/* ... (all previous CSS) ... */
+
+/* Food Choice Button Styling */
+.food-choice-button {
+    padding: 10px 15px;
+    font-size: 1em;
+    margin: 0 5px; /* Spacing between buttons */
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    min-width: 80px; /* Ensure buttons have some minimum width */
+    text-align: center;
+}
+
+.food-choice-button:hover {
+    background-color: #e9ecef;
+}
+
+.food-choice-button:active {
+    transform: scale(0.95);
+}
